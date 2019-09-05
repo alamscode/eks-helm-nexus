@@ -1,0 +1,25 @@
+{{- if not .Values.statefulset.enabled }}
+{{- if and .Values.persistence.enabled (not .Values.persistence.existingClaim) }}
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: nexus-data
+  {{- if .Values.namespace.enabled }}
+  namespace: {{ .Values.namespace.name }}
+  {{- else }}
+  namespace: default
+  {{- end }}
+  labels:
+{{ include "nexus.labels" . | indent 4 }}
+
+  annotations:
+    iam.amazonaws.com/role: arn:aws:iam::{{ .Values.eks.aws_account }}:role/{{ .Values.eks.roleName }}
+spec:
+  accessModes:
+    - {{ .Values.persistence.accessMode | quote }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.storageSize | quote }}
+  storageClassName: "{{ .Values.persistence.storageClass }}"
+{{- end }}
+{{- end }}

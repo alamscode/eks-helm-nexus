@@ -1,0 +1,108 @@
+statefulset:
+  enabled: true
+replicaCount: 1
+deploymentStrategy: {}
+
+namespace: 
+  enabled: true
+  name: nexus
+
+nexus:
+  imageName: 853219876644.dkr.ecr.us-east-1.amazonaws.com/nexus-okta
+  imageTag: latest
+  env:
+    - name: INSTALL4J_ADD_VM_PARAMS
+      value: "-Xms1200M -Xmx1200M -XX:MaxDirectMemorySize=2G -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap"
+  resources:
+    limits:
+      memory: "4Gi"
+      cpu: "1000m"
+    requests:
+      memory: "2Gi"
+      cpu: "500m"
+  nexusPort: 8081
+  dockerPort: 1111
+  annotations: 
+    iam.amazonaws.com/role: arn:aws:iam::853219876644:role/eks_worker_role_k8s_qa_nclouds
+  podAnnotations: {}
+  livenessProbe:
+    initialDelaySeconds: 30
+    periodSeconds: 30
+    failureThreshold: 6
+    path: /
+  readinessProbe:
+    initialDelaySeconds: 30
+    periodSeconds: 30
+    failureThreshold: 6
+    path: /
+  hostAliases: []
+
+persistence:
+  enabled: true
+  accessMode: ReadWriteOnce
+  storageClass: storageclass-nexus
+  # existingClaim: 
+  storageSize: 15Gi
+  storageType: gp2
+
+tolerations: []
+
+deployment:
+  annotations: {}
+  # # Add init containers. e.g. to be used to give specific permissions for nexus-data.
+  initContainers:
+  - name: restore-container
+    image: 853219876644.dkr.ecr.us-east-1.amazonaws.com/awscli:latest
+    resources:
+      limits:
+        memory: "4Gi"
+        cpu: "1000m"
+      requests:
+        memory: "2Gi"
+        cpu: "500m"
+    ports:
+      - containerPort: 80
+    volumeMounts:
+      - name: nexus-data
+        mountPath: /nexus-data
+    args:
+    - "s3"
+    - "sync"
+    - "s3://nexus-service-lb"
+    - "/nexus-data/s3Backup"
+  
+  postStart:
+    command: '["/bin/bash", "-c", "sleep 120 && rm -rf /nexus-data/db/config /nexus-data/db/security /nexus-data/db/component && cp /nexus-data/s3Backup/db/*.bak /nexus-data/restore-from-backup/ && rm -rf /nexus-data/blobs/* && cp -r /nexus-data/s3Backup/blobs/* /nexus-data/blobs/ && mkdir /nexus-service && mv -f /etc/service/nexus/* /nexus-service/ && pkill java && sleep 5 && mv /nexus-service/* /etc/service/nexus/ && /etc/service/nexus/nexus/run || true"]'
+  additionalContainers:
+  additionalVolumes:
+  additionalVolumeMounts:
+
+# # To use an additional service, set enable to true
+service:
+  name: nexus-service-lb
+  namespace: nexus
+  enabled: true
+  serviceType: LoadBalancer
+  labels: {}
+  ports:
+  - name: nexus-service-lb
+    targetPort: 8081
+    port: 8081
+  - name: docker-port1
+    targetPort: 1111
+    port: 1111
+  - name: docker-port2
+    targetPort: 2222
+    port: 2222
+  - name: docker-port3
+    targetPort: 3333
+    port: 3333
+
+eks:
+  aws_account: "853219876644"
+  roleName: eks_worker_role_k8s_qa_nclouds
+  aws_region: "us-east-1"
+
+volume:
+  mountPath: /nexus-data
+  mountName: nexus-data
