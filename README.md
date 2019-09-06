@@ -7,7 +7,6 @@ This chart deploys Sonatype Nexus OSS repository manager in a Kubernetes Cluster
 - AWS S3 (Amazon Simple Storage Service) is used for backups
 - AWS ECR (Amazon Elastic Container Registry) is used for managing container images
 
-***
 
 ### Prerequisites
 
@@ -15,7 +14,6 @@ This chart deploys Sonatype Nexus OSS repository manager in a Kubernetes Cluster
 - AWS EKS Cluster with Autoscaling, External DNS and required IAM roles enabled and nodes that fulfill Nexus requirements. A very good place to start : 
   https://github.com/alamscode/generalized/tree/rogue_one/terraform/terraform-eks
 
----
 
 ### How to:
 

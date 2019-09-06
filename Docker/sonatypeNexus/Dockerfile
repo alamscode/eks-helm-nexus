@@ -17,7 +17,7 @@ ENV NEXUS_HOME "${SONATYPE_DIR}/nexus"
 ENV NEXUS_DATA /nexus-data
 ENV NEXUS_CONTEXT ''
 ENV SONATYPE_WORK ${SONATYPE_DIR}/sonatype-work
-# uncomment the following if you want to enable Okta plugin and enter the Okta account name
+# uncomment the following and enter the Okta account name
 # ENV YOUR_ACCOUNT your_account
 
 # Install prerequisites
@@ -58,7 +58,6 @@ RUN mkdir -p ${NEXUS_DATA}/etc ${NEXUS_DATA}/log ${NEXUS_DATA}/tmp ${SONATYPE_WO
 
 
 # install plugins (Okta plugin) - uncomment to apply
-
 # RUN apk update && \
 #     apk add curl && \
 #     curl -L \
