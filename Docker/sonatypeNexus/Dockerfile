@@ -17,7 +17,8 @@ ENV NEXUS_HOME "${SONATYPE_DIR}/nexus"
 ENV NEXUS_DATA /nexus-data
 ENV NEXUS_CONTEXT ''
 ENV SONATYPE_WORK ${SONATYPE_DIR}/sonatype-work
-ENV YOUR_ACCOUNT guidespark
+# uncomment the following if you want to enable Okta plugin and enter the Okta account name
+# ENV YOUR_ACCOUNT your_account
 
 # Install prerequisites
 RUN apk add --no-cache --update bash ca-certificates runit su-exec util-linux openjdk8-jre
@@ -56,16 +57,17 @@ RUN mkdir -p ${NEXUS_DATA}/etc ${NEXUS_DATA}/log ${NEXUS_DATA}/tmp ${SONATYPE_WO
   && chown -R nexus:nexus ${NEXUS_DATA}
 
 
-# install plugins
-RUN apk update && \
-    apk add curl && \
-    curl -L \
-    https://github.com/ruhkopf/nexus-okta-auth-plugin/releases/download/0.0.3/nexus-okta-auth-plugin-0.0.3.jar --output /opt/sonatype/nexus/system/nexus-okta-auth-plugin.jar && \
-    echo "reference\:file\:nexus-okta-auth-plugin.jar = 200" >> /opt/sonatype/nexus/etc/karaf/startup.properties && \
-    touch /opt/sonatype/nexus/etc/nexus-okta-auth.properties && \
-    echo "okta.org.url=https://${YOUR_ACCOUNT}.okta.com/" >> /opt/sonatype/nexus/etc/nexus-okta-auth.properties && \
-    chown nexus:nexus -R /opt/sonatype/nexus && \
-    rm -rf /var/cache/apk
+# install plugins (Okta plugin) - uncomment to apply
+
+# RUN apk update && \
+#     apk add curl && \
+#     curl -L \
+#     https://github.com/ruhkopf/nexus-okta-auth-plugin/releases/download/0.0.3/nexus-okta-auth-plugin-0.0.3.jar --output /opt/sonatype/nexus/system/nexus-okta-auth-plugin.jar && \
+#     echo "reference\:file\:nexus-okta-auth-plugin.jar = 200" >> /opt/sonatype/nexus/etc/karaf/startup.properties && \
+#     touch /opt/sonatype/nexus/etc/nexus-okta-auth.properties && \
+#     echo "okta.org.url=https://${YOUR_ACCOUNT}.okta.com/" >> /opt/sonatype/nexus/etc/nexus-okta-auth.properties && \
+#     chown nexus:nexus -R /opt/sonatype/nexus && \
+#     rm -rf /var/cache/apk
 
 # Update logback configuration to store 30 days logs rather than 90 days default
 RUN sed -i -e 's|<maxHistory>90</maxHistory>|<maxHistory>30</maxHistory>|g' ${NEXUS_HOME}/etc/logback/logback*.xml
