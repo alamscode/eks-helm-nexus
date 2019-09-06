@@ -1,6 +1,6 @@
 # Nexus OSS in AWS EKS Cluster through Helm Chart
 
->  Nexus OSS is a free open source private repository manager. It supports a wide range of package formats and it's used by hundreds of tech companies.
+Nexus OSS is a free open source private repository manager. It supports a wide range of package formats and it's used by hundreds of tech companies.
 
 This chart deploys Sonatype Nexus OSS repository manager in a Kubernetes Cluster. This setup is best configured in AWS EKS (Amazon Elastic Kubernetes Service) since:
 
